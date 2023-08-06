@@ -87,10 +87,25 @@ function Form({ OnAddItems }) {
 }
 
 function PackingList({ items, OnDeleteItem, OnToggleItem }) {
+  const [sortBy, setSortBy] = useState("input");
+
+  let sortedItems;
+
+  if (sortBy === "input") sortedItems = items;
+  else if (sortBy === "description") {
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  } else {
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+  }
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             item={item}
             OnDeleteItem={OnDeleteItem}
@@ -99,6 +114,13 @@ function PackingList({ items, OnDeleteItem, OnToggleItem }) {
           />
         ))}
       </ul>
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">Sort by input order</option>
+          <option value="description">Sort by description</option>
+          <option value="packed">Sort by packed status</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -113,7 +135,7 @@ function Item({ item, OnDeleteItem, OnToggleItem }) {
       ></input>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {" "}
-        {item.description} ({item.quantity})
+        {item.description} ({item.quantity} pieces)
       </span>
       <button onClick={() => OnDeleteItem(item.id)}>❌</button>
     </li>
